@@ -1,0 +1,131 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+
+export DEB_BUILD_MAINT_OPTIONS   := hardening=+bindnow
+# CMake doesn't use CPPFLAGS, pass them to CFLAGS/CXXFLAGS to enable the
+# missing (hardening) flags. dpkg_buildflags is necessary because $(shell ..)
+# doesn't use local environment variables. (bug #665324)
+dpkg_buildflags = DEB_BUILD_MAINT_OPTIONS=$(DEB_BUILD_MAINT_OPTIONS) dpkg-buildflags
+export DEB_CFLAGS_MAINT_APPEND   := -pipe -Wall $(shell $(dpkg_buildflags) --get CPPFLAGS)
+export DEB_CXXFLAGS_MAINT_APPEND := -pipe -Wall $(shell $(dpkg_buildflags) --get CPPFLAGS)
+
+#export DEB_LDFLAGS_MAINT_APPEND  := -Wl,-z,defs -Wl,--as-needed
+# disable -Wl,--as-needed on ia64 due to bug #718047, see also #725143
+ifeq ($(DEB_HOST_ARCH),ia64)
+export DEB_LDFLAGS_MAINT_APPEND  := -Wl,-z,defs
+else
+export DEB_LDFLAGS_MAINT_APPEND  := -Wl,-z,defs -Wl,--as-needed
+endif
+
+
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
+
+# Use this variable to define the particular version of OGRE that we're building
+OGRE_VERSION=1.9.0
+
+OGRE_CHANGELOG = Docs/ChangeLog.html
+
+# Directories to install with Multi-arch and versioned OGRE dir names
+LIB_MULTIARCH_DIR = /usr/lib/$(DEB_HOST_MULTIARCH)
+LIB_MULTIARCH_PRIVATE_DIR = /usr/lib/$(DEB_HOST_MULTIARCH)/OGRE-$(OGRE_VERSION)
+
+
+%:
+	dh $@ --buildsystem=cmake --parallel
+
+override_dh_auto_configure:
+        # Samples removed (do not meet DFSG), modify CMake files accordingly
+	sed -i 's|^add_subdirectory(Samples)|#add_subdirectory(Samples)|' CMakeLists.txt
+        #sed -i "/OGRE_.*_PATH/ s|share/OGRE|share/OGRE-$(OGRE_VERSION)|g" CMake/InstallResources.cmake
+
+        # RPATH from http://www.ogre3d.org/tikiwiki/Building+Ogre+With+CMake
+	dh_auto_configure -- \
+		-DOGRE_LIB_DIRECTORY="lib/$(DEB_HOST_MULTIARCH)" \
+		-DOGRE_FULL_RPATH:BOOL=FALSE \
+		-DOGRE_BUILD_DOCS:BOOL=TRUE \
+		-DOGRE_INSTALL_DOCS:BOOL=TRUE \
+		-DOGRE_BUILD_SAMPLES:BOOL=FALSE \
+		-DOGRE_INSTALL_SAMPLES:BOOL=FALSE \
+		-DOGRE_INSTALL_SAMPLES_SOURCE:BOOL=FALSE
+
+#override_dh_auto_build-arch:
+#	dh_auto_build -a --
+
+override_dh_auto_build-indep:
+	dh_auto_build -i --
+
+        # generate doxygen API doc
+        #cd obj-$(DEB_HOST_MULTIARCH) && make OgreDoc
+	dh_auto_build -i -- OgreDoc
+
+        # API generated again in makedocs.sh, disable and generate only manual
+        # and vbo-update
+	sed -i 's|doxygen src/html.cfg|#doxygen src/html.cfg|g' Docs/src/makedocs.sh
+	sed -i '/texi2html/ s|texi2html -Verbose|makeinfo --html --force|g;s|-split=node -top_file=index.html|--split=node|g' Docs/src/makedocs.sh
+	cd Docs && bash ./src/makedocs.sh
+
+override_dh_install-arch:
+        # Copy files from template for this particular version
+	cp -f debian/libogre-VERSION.install debian/libogre-$(OGRE_VERSION).install
+	cp -f debian/libogre-VERSION.lintian-overrides debian/libogre-$(OGRE_VERSION).lintian-overrides
+	cp -f debian/libogre-VERSION.preinst debian/libogre-$(OGRE_VERSION).preinst
+	cp -f debian/libogre-VERSION.postinst debian/libogre-$(OGRE_VERSION).postinst
+	cp -f debian/libogre-VERSION.postrm debian/libogre-$(OGRE_VERSION).postrm
+
+        # Workaround for CMake and debhelper with mutiarch (Debian bug:
+        # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=641051 )
+        #
+        # Using cmake's OGRE_LIB_DIRECTORY now
+        #
+        #sed -i "/^libdir=/ s|/lib|/lib/$(DEB_HOST_MULTIARCH)|" debian/tmp/usr/lib/pkgconfig/*
+        #sed -i "/{libdir}/ s|{libdir}/OGRE|{libdir}/OGRE-$(OGRE_VERSION)|g" debian/tmp/usr/lib/pkgconfig/*
+        #
+        # Moving libraries by hand
+        #mkdir -p /tmp/$(DEB_HOST_MULTIARCH)
+        #mv debian/tmp/usr/lib/* /tmp/$(DEB_HOST_MULTIARCH)/
+        #mv /tmp/$(DEB_HOST_MULTIARCH) debian/tmp/usr/lib/
+
+        # Introduced in 1.7.3-5 as an attempt at using versioned files/dirs for
+        # plugins and config files (so several versions of OGRE can be installed
+        # at once)
+	mv debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/OGRE debian/tmp/$(LIB_MULTIARCH_PRIVATE_DIR)
+	sed -i "/{libdir}/ s|{libdir}/OGRE|{libdir}/OGRE-$(OGRE_VERSION)|g" debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/pkgconfig/*
+        # Samples
+        #sed -i "/OGRE/ s|/OGRE|/OGRE-$(OGRE_VERSION)|g" debian/tmp/usr/share/OGRE/*.cfg
+        #mv debian/tmp/usr/share/OGRE debian/tmp/usr/share/OGRE-$(OGRE_VERSION)
+
+        # multi-arch/rpath issue with lintian:
+        # E: libogre-1.7.3: binary-or-shlib-defines-rpath usr/lib/x86_64-linux-gnu/OGRE/Plugin_OctreeZone.so /usr/lib/OGRE
+	chrpath --replace $(LIB_MULTIARCH_PRIVATE_DIR) debian/tmp/$(LIB_MULTIARCH_PRIVATE_DIR)/Plugin_OctreeZone.so.*
+
+        # docs installed in other way
+        #rm -rfv debian/tmp/usr/share/OGRE/docs
+
+        # remove .md5, .map and other files that we do not want installed
+        #find debian/tmp/usr/share/OGRE/docs/api/html -type f -not \( -iname '*.html' -or -iname '*.png' -or -iname '*.css' -or -iname '*.js' \) -exec rm -fv {} \;
+
+	dh_install -a --list-missing
+
+override_dh_install-indep:
+        # remove .md5, .map and other files that we do not want installed
+	find debian/tmp/usr/share/OGRE/docs/api/html -type f -not \( -iname '*.html' -or -iname '*.png' -or -iname '*.css' -or -iname '*.js' \) -exec rm -fv {} \;
+
+	dh_install -i --list-missing
+
+override_dh_installchangelogs:
+	dh_installchangelogs -- $(OGRE_CHANGELOG)
+
+override_dh_strip:
+	dh_strip -plibogre-$(OGRE_VERSION) --dbg-package=libogre-$(OGRE_VERSION)-dbg
+	dh_strip -pogre-1.9-tools
+        #dh_strip -pogre-1.9-samples --dbg-package=ogre-1.9-samples-dbg
+
+override_dh_clean:
+	dh_clean
+
+        # Remove files from template
+	rm -rf debian/libogre-$(OGRE_VERSION).*

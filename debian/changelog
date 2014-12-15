@@ -1,0 +1,10 @@
+ogre-1.9 (1.9.0~osrf1) unstable; urgency=low
+
+  * Code imported from the fork
+    https://bitbucket.org/acornacorn/ogre/overview in order to generate an
+    OGRE package with 3D build capacities.
+
+  * Debian metadata was taken from ubuntu trusty libogre-1.9
+
+ -- Jose Luis Rivero <jrivero@osrfoundation.org>  Mon, 15 Dec 2014 00:50:55 +0000
+
