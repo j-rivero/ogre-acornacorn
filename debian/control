@@ -1,12 +1,10 @@
-Source: ogre-1.9
+Source: ogre3d-1.9
 Priority: optional
 Section: libs
 Standards-Version: 3.9.4
 Maintainer: Debian Games Team <pkg-games-devel@lists.alioth.debian.org>
 Uploaders: Manuel A. Fernandez Montecelo <mafm@debian.org>
 Homepage: http://ogre3d.org/
-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-games/ogre-1.9.git
-Vcs-Git: git://anonscm.debian.org/pkg-games/ogre-1.9.git
 Build-Depends: debhelper (>= 9~),
                dpkg-dev (>= 1.16.1~),
                cmake (>= 2.8.0),
@@ -33,15 +31,15 @@ Build-Depends-Indep: doxygen,
                      graphviz,
                      texinfo
 
-Package: libogre-1.9-dev
+Package: libogre3d-1.9-dev
 Section: libdevel
 Architecture: any
 Depends: ${misc:Depends},
-         libogre-1.9.0 (= ${binary:Version}),
+         libogre3d-1.9.0 (= ${binary:Version}),
          libboost1.54-dev,
          libboost-thread1.54-dev
-Conflicts: libogre-dev (<< 1.9.0), libogre-1.8-dev (<< 1.9.0)
-Suggests: ogre-1.9-doc
+Conflicts: libogre-dev, libogre-1.8-dev, libogre-1.9-dev
+Suggests: ogre3d-1.9-doc
 Description: 3D Object-Oriented Graphics Rendering Engine (development files)
  OGRE (Object-Oriented Graphics Rendering Engine) is a scene-oriented, flexible
  3D engine written in C++ designed to make it easier and more intuitive for
@@ -52,12 +50,13 @@ Description: 3D Object-Oriented Graphics Rendering Engine (development files)
  .
  This package contains the headers needed to develop with OGRE.
 
-Package: libogre-1.9.0
+Package: libogre3d-1.9.0
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${misc:Depends},
          ${shlibs:Depends}
+Conflicts: libogre-1.9.0
 Description: 3D Object-Oriented Graphics Rendering Engine (libraries)
  OGRE (Object-Oriented Graphics Rendering Engine) is a scene-oriented, flexible
  3D engine written in C++ designed to make it easier and more intuitive for
@@ -68,13 +67,13 @@ Description: 3D Object-Oriented Graphics Rendering Engine (libraries)
  .
  This package contains the library and plugins.
 
-Package: libogre-1.9.0-dbg
+Package: libogre3d-1.9.0-dbg
 Section: debug
 Architecture: any
 Multi-Arch: same
 Priority: extra
 Depends: ${misc:Depends},
-         libogre-1.9.0 (= ${binary:Version})
+         libogre3d-1.9.0 (= ${binary:Version})
 Description: 3D Object-Oriented Graphics Rendering Engine (debugging libs)
  OGRE (Object-Oriented Graphics Rendering Engine) is a scene-oriented, flexible
  3D engine written in C++ designed to make it easier and more intuitive for
@@ -85,10 +84,11 @@ Description: 3D Object-Oriented Graphics Rendering Engine (debugging libs)
  .
  This package contains the debugging version of the library and plugins.
 
-Package: ogre-1.9-doc
+Package: ogre3d-1.9-doc
 Section: doc
 Architecture: all
 Depends: ${misc:Depends}
+Conflicts: ogre-1.9-doc
 Description: 3D Object-Oriented Graphics Rendering Engine (documentation)
  OGRE (Object-Oriented Graphics Rendering Engine) is a scene-oriented, flexible
  3D engine written in C++ designed to make it easier and more intuitive for
@@ -99,12 +99,12 @@ Description: 3D Object-Oriented Graphics Rendering Engine (documentation)
  .
  This package contains the documentation.
 
-Package: ogre-1.9-tools
+Package: ogre3d-1.9-tools
 Section: devel
 Architecture: any
 Depends: ${misc:Depends},
          ${shlibs:Depends}
-Conflicts: ogre-tools (<< 1.9.0), ogre-1.8-tools (<< 1.9.0)
+Conflicts: ogre-tools (<< 1.9.0), ogre-1.8-tools (<< 1.9.0), ogre-1.9-tools
 Description: 3D Object-Oriented Graphics Rendering Engine (tools)
  OGRE (Object-Oriented Graphics Rendering Engine) is a scene-oriented, flexible
  3D engine written in C++ designed to make it easier and more intuitive for
@@ -116,12 +116,12 @@ Description: 3D Object-Oriented Graphics Rendering Engine (tools)
  This package contains tools used to convert from and to OGRE's native mesh
  format.
 
-Package: blender-ogrexml-1.9
+Package: blender-ogre3dxml-1.9
 Section: graphics
 Architecture: all
 Depends: ${misc:Depends},
          blender
-Conflicts: blender-ogrexml (<< 1.9.0), blender-ogrexml-1.8 (<< 1.9.0)
+Conflicts: blender-ogrexml (<< 1.9.0), blender-ogrexml-1.8 (<< 1.9.0), blender-ogre-1.9
 Description: Blender Exporter for OGRE
  OGRE (Object-Oriented Graphics Rendering Engine) is a scene-oriented, flexible
  3D engine written in C++ designed to make it easier and more intuitive for

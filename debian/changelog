@@ -1,4 +1,4 @@
-ogre-1.9 (1.9.0~osrf1) unstable; urgency=low
+ogre3d-1.9 (1.9.0~osrf1) unstable; urgency=low
 
   * Code imported from the fork
     https://bitbucket.org/acornacorn/ogre/overview in order to generate an

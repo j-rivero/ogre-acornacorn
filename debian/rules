@@ -70,11 +70,11 @@ override_dh_auto_build-indep:
 
 override_dh_install-arch:
         # Copy files from template for this particular version
-	cp -f debian/libogre-VERSION.install debian/libogre-$(OGRE_VERSION).install
-	cp -f debian/libogre-VERSION.lintian-overrides debian/libogre-$(OGRE_VERSION).lintian-overrides
-	cp -f debian/libogre-VERSION.preinst debian/libogre-$(OGRE_VERSION).preinst
-	cp -f debian/libogre-VERSION.postinst debian/libogre-$(OGRE_VERSION).postinst
-	cp -f debian/libogre-VERSION.postrm debian/libogre-$(OGRE_VERSION).postrm
+	cp -f debian/libogre-VERSION.install debian/libogre3d-$(OGRE_VERSION).install
+	cp -f debian/libogre-VERSION.lintian-overrides debian/libogre3d-$(OGRE_VERSION).lintian-overrides
+	cp -f debian/libogre-VERSION.preinst debian/libogre3d-$(OGRE_VERSION).preinst
+	cp -f debian/libogre-VERSION.postinst debian/libogre3d-$(OGRE_VERSION).postinst
+	cp -f debian/libogre-VERSION.postrm debian/libogre3d-$(OGRE_VERSION).postrm
 
         # Workaround for CMake and debhelper with mutiarch (Debian bug:
         # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=641051 )
@@ -120,12 +120,12 @@ override_dh_installchangelogs:
 	dh_installchangelogs -- $(OGRE_CHANGELOG)
 
 override_dh_strip:
-	dh_strip -plibogre-$(OGRE_VERSION) --dbg-package=libogre-$(OGRE_VERSION)-dbg
-	dh_strip -pogre-1.9-tools
+	dh_strip -plibogre3d-$(ogre3d_VERSION) --dbg-package=libogre3d-$(ogre3d_VERSION)-dbg
+	dh_strip -pogre3d-1.9-tools
         #dh_strip -pogre-1.9-samples --dbg-package=ogre-1.9-samples-dbg
 
 override_dh_clean:
 	dh_clean
 
         # Remove files from template
-	rm -rf debian/libogre-$(OGRE_VERSION).*
+	rm -rf debian/libogre3d-$(OGRE_VERSION).*
