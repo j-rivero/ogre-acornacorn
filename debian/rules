@@ -120,7 +120,7 @@ override_dh_installchangelogs:
 	dh_installchangelogs -- $(OGRE_CHANGELOG)
 
 override_dh_strip:
-	dh_strip -plibogre3d-$(ogre3d_VERSION) --dbg-package=libogre3d-$(ogre3d_VERSION)-dbg
+	dh_strip -plibogre3d-$(OGRE_VERSION) --dbg-package=libogre3d-$(OGRE_VERSION)-dbg
 	dh_strip -pogre3d-1.9-tools
         #dh_strip -pogre-1.9-samples --dbg-package=ogre-1.9-samples-dbg
 
