@@ -1,3 +1,10 @@
+ogre3d-1.9 (1.9.0~osrf2) unstable; urgency=medium
+
+  * Fix debian rules
+  * Need to compile stereo support
+
+ -- Jose Luis Rivero <jrivero@osrfoundation.org>  Sat, 03 Jan 2015 02:10:32 +0100
+
 ogre3d-1.9 (1.9.0~osrf1) unstable; urgency=low
 
   * Code imported from the fork
